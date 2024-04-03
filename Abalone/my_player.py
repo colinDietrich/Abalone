@@ -161,6 +161,8 @@ class MyPlayer(PlayerAbalone):
 
 
     def evaluate(self, state: GameStateAbalone) -> int:
+        # Note : l'heuristique peut encore encore être énormément améliorée, je l'ai faite un peu à la va vite, 
+        #        je voulais surtout que le squelette soit fait pour l'algorithme MiniMax
         """
         Évalue un état donné du jeu Abalone et retourne un score basé sur le score, l'avantage de placement et la mobilité.
 
