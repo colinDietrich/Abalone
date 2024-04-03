@@ -37,35 +37,40 @@ class MyPlayer(PlayerAbalone):
             Action: selected feasible action
         """
         possible_actions = list(current_state.get_possible_actions())
-        print(current_state)
         self.other_id = possible_actions[0].get_next_game_state().next_player.get_id()
-        depth = 2 #at least 1
-        action, score = self.miniMax(current_state, depth, True)
+        depth = 3 #at least 1
+        action, score = self.miniMax(current_state, depth, alpha=float('-inf'), beta=float('inf'), maximizing=True)
         return action
     
     
-    def miniMax(self, state: GameStateAbalone, depth, maximizing):
-        """miniMax algorithm determine the best action"""
+    def miniMax(self, state: GameStateAbalone, depth: int, alpha, beta, maximizing: bool):
+        """miniMax algorithm determine the best action with alpah-beta pruning"""
         if depth == 0:
             return None, self.utility(state)
         
         if maximizing:
             # player maximizing
-            max_score = -7
+            max_score = float('-inf')
             best_action = None
             for action in state.get_possible_actions():
-                _, score = self.miniMax(action.get_next_game_state(), depth-1, False)
+                _, score = self.miniMax(action.get_next_game_state(), depth-1, alpha, beta, maximizing=False)
                 if score > max_score:
                     best_action, max_score = action, score
+                alpha = max(alpha, score)
+                if beta <= alpha:
+                    break
             return best_action, max_score
         else :
             # player minimizing
-            min_score = 7
+            min_score = float('inf')
             best_action = None
             for action in state.get_possible_actions():
-                _, score = self.miniMax(action.get_next_game_state(), depth-1, True)
+                _, score = self.miniMax(action.get_next_game_state(), depth-1, alpha, beta, maximizing=True)
                 if score < min_score:
                     best_action, min_score = action, score
+                beta = min(beta, score)
+                if beta <= alpha:
+                    break
             return best_action, min_score
 
 
