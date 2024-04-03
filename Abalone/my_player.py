@@ -3,7 +3,7 @@ from game_state_abalone import GameStateAbalone
 from seahorse.game.action import Action
 from seahorse.game.game_state import GameState
 from seahorse.utils.custom_exceptions import MethodNotImplementedError
-import time  # Import time module to keep track of elapsed time
+import time
 
 
 class MyPlayer(PlayerAbalone):
