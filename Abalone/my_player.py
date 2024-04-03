@@ -36,5 +36,41 @@ class MyPlayer(PlayerAbalone):
         Returns:
             Action: selected feasible action
         """
-        #TODO
-        raise MethodNotImplementedError()
+        possible_actions = list(current_state.get_possible_actions())
+        print(current_state)
+        self.other_id = possible_actions[0].get_next_game_state().next_player.get_id()
+        depth = 2 #at least 1
+        action, score = self.miniMax(current_state, depth, True)
+        return action
+    
+    
+    def miniMax(self, state: GameStateAbalone, depth, maximizing):
+        """miniMax algorithm determine the best action"""
+        if depth == 0:
+            return None, self.utility(state)
+        
+        if maximizing:
+            # player maximizing
+            max_score = -7
+            best_action = None
+            for action in state.get_possible_actions():
+                _, score = self.miniMax(action.get_next_game_state(), depth-1, False)
+                if score > max_score:
+                    best_action, max_score = action, score
+            return best_action, max_score
+        else :
+            # player minimizing
+            min_score = 7
+            best_action = None
+            for action in state.get_possible_actions():
+                _, score = self.miniMax(action.get_next_game_state(), depth-1, True)
+                if score < min_score:
+                    best_action, min_score = action, score
+            return best_action, min_score
+
+
+    def utility(self, state:GameStateAbalone):
+        """Computes the score of a state for the player that is the agent
+        Score is calculated as the difference bewteen the score of each player"""
+        score = state.scores[self.id] - state.scores[self.other_id]
+        return score
