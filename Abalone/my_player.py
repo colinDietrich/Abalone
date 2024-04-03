@@ -38,24 +38,36 @@ class MyPlayer(PlayerAbalone):
         """
         possible_actions = list(current_state.get_possible_actions())
         self.other_id = possible_actions[0].get_next_game_state().next_player.get_id()
-        depth = 3 #at least 1
+        depth = 3 # Depth of the minimax search (>1)
         action, score = self.miniMax(current_state, depth, alpha=float('-inf'), beta=float('inf'), maximizing=True)
         return action
     
     
     def miniMax(self, state: GameStateAbalone, depth: int, alpha, beta, maximizing: bool):
-        """miniMax algorithm determine the best action with alpah-beta pruning"""
+        """miniMax algorithm determine the best action with alpah-beta pruning
+        
+        Args:
+            state (GameStateAbalone): The current game state.
+            depth (int): The depth of the search from that state.
+            alpha (float): The alpha value for alpha-beta pruning.
+            beta (float): The beta value for alpha-beta pruning.
+            maximizing (bool): Indicates whether the current player is maximizing or minimizing.
+
+        Returns:
+            Tuple[Action, int]: The best action and its corresponding score."""
         if depth == 0:
-            return None, self.utility(state)
+            return None, self.evaluate_state(state)
         
         if maximizing:
             # player maximizing
             max_score = float('-inf')
             best_action = None
             for action in state.get_possible_actions():
+                # Recursively call miniMax for the next possible state with a minimizing player
                 _, score = self.miniMax(action.get_next_game_state(), depth-1, alpha, beta, maximizing=False)
                 if score > max_score:
                     best_action, max_score = action, score
+                # Alpha-beta pruning
                 alpha = max(alpha, score)
                 if beta <= alpha:
                     break
@@ -65,16 +77,18 @@ class MyPlayer(PlayerAbalone):
             min_score = float('inf')
             best_action = None
             for action in state.get_possible_actions():
+                # Recursively call miniMax for the next possible state with a maximizing player
                 _, score = self.miniMax(action.get_next_game_state(), depth-1, alpha, beta, maximizing=True)
                 if score < min_score:
                     best_action, min_score = action, score
+                # Alpha-beta pruning
                 beta = min(beta, score)
                 if beta <= alpha:
                     break
             return best_action, min_score
 
 
-    def utility(self, state:GameStateAbalone):
+    def evaluate_state(self, state:GameStateAbalone):
         """Computes the score of a state for the player that is the agent
         Score is calculated as the difference bewteen the score of each player"""
         score = state.scores[self.id] - state.scores[self.other_id]
