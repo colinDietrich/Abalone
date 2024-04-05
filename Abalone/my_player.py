@@ -4,6 +4,7 @@ from seahorse.game.action import Action
 from seahorse.game.game_state import GameState
 from seahorse.utils.custom_exceptions import MethodNotImplementedError
 import time
+#from dist import precompute_distances, valid_coordinates
 
 
 class MyPlayer(PlayerAbalone):
@@ -37,10 +38,9 @@ class MyPlayer(PlayerAbalone):
         Returns:
             Action: selected feasible action
         """
-        
         possible_actions = list(current_state.get_possible_actions())
         self.other_id = possible_actions[0].get_next_game_state().next_player.get_id()
-        depth = 3 # Depth of the minimax search (>1)
+        depth = 1 # Depth of the minimax search (>1)
         action, score = self.miniMax(current_state, depth, alpha=float('-inf'), beta=float('inf'), maximizing=True)
         return action
     
@@ -57,7 +57,7 @@ class MyPlayer(PlayerAbalone):
 
         Returns:
             Tuple[Action, int]: The best action and its corresponding score."""
-        if depth == 0:
+        if depth == 0 or state.is_done():
             return None, self.evaluate_state(state)
         
         if maximizing:
@@ -96,6 +96,14 @@ class MyPlayer(PlayerAbalone):
         # Avantage du nombre de billes
         ball_score = state.scores[self.id] - state.scores[self.other_id]
         # Avantage de placement : distance totale des pièces par rapport au centre du plateau
+        central_score = self.distance_to_center(state)
+        # param tuning
+        a = 1
+        b = 0.001
+        score = a * ball_score - b * central_score
+        return score
+    
+    def distance_to_center(self, state:GameStateAbalone):
         grid = state.get_rep().get_env()
         central_position = (8, 4)
         player_pieces = []
@@ -105,10 +113,8 @@ class MyPlayer(PlayerAbalone):
                 player_pieces.append(coord)
                 distance = self.manhattanDist(coord,central_position)
                 length_to_center += distance
+        return length_to_center
         
-        # legnth to center used only to discriminate states with equal ball_score
-        score = ball_score - length_to_center/1000
-        return score
     
     def manhattanDist(self, A, B):
         # Note : la fonctionne pour une distance au centre ( A ou B = (8; 4))
@@ -144,22 +150,3 @@ class MyPlayer(PlayerAbalone):
             return 1 - (total_distance / (total_possible_distance * 6))  # Normalize distance to [0, 1] range
         else:
             return 0
-    
-    def order_moves(self, actions) -> list[Action]:
-        """
-        Trie les actions possibles selon la différence de score résultant de l'état qui
-        découle de chaque action, dans le but de prioriser les actions les plus prometteuses.
-
-        Args:
-            actions (list[Action]): Une liste d'actions possibles à partir de l'état actuel du jeu.
-
-        Returns:
-            list[Action]: La liste des actions triées de manière décroissante selon la différence
-            de score, favorisant les actions qui augmentent le plus le score du joueur par rapport
-            à celui de l'adversaire.
-        """
-        # Trie les actions en fonction de la différence de score entre le score du joueur
-        # après avoir effectué l'action et le score de l'adversaire dans l'état résultant.
-        # 'reverse=True' assure que le tri est fait dans l'ordre décroissant, donc les actions
-        # avec la plus grande différence de score (les plus avantageuses) sont placées en premier.
-        return sorted(actions, key=lambda a: a.get_next_game_state().scores[self.id] - a.get_next_game_state().scores[self.other_id], reverse=True)
