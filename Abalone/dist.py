@@ -51,7 +51,9 @@ valid_coordinates = set([
     (10, 0), (9, 1), (8, 2), (7, 3), (6, 4), (5, 5), (4, 6), (3, 7),
     (12, 0), (11, 1), (10, 2), (9, 3), (8, 4), (7, 5), (6, 6), (5, 7), (4, 8),
     (14, 0), (13, 1), (12, 2), (11, 3), (10, 4), (9, 5), (8, 6), (7, 7), (6, 8),
-    (16, 0), (15, 1), (14, 2), (13, 3), (12, 4), (11, 5), (10, 6), (9, 7), (8, 8)
+    (16, 0), (15, 1), (14, 2), (13, 3), (12, 4), (11, 5), (10, 6), (9, 7), (8, 8),
+    (15, 3), (14, 4), (13, 5), (12, 6), (11,7), (10, 8),
+    (16, 4), (15, 5), (14, 6), (13, 7), (12, 8),
 ])
 
 # Test the new function with the same cells to verify correctness
@@ -65,11 +67,11 @@ def precompute_distances(valid_cells):
                 distance_table[(start, goal)] = bfs_shortest_path(start, goal)
     return distance_table
 
-# Now call the precompute function and store the result in 'all_distances'
+## Now call the precompute function and store the result in 'all_distances'
 all_distances = precompute_distances(valid_coordinates)
 
 # Test printing some distances to verify (you can remove or comment this out later)
-test_cases = [((0, 4), (6, 0)), ((4, 0), (4, 4)), ((0, 4), (8, 0)), ((7, 3), (9, 5))]
+test_cases = [((11, 5), (10, 8)), ((4, 0), (4, 4)), ((0, 4), (8, 0)), ((7, 3), (9, 5))]
 for start, goal in test_cases:
     print(f"Distance from {start} to {goal}: {all_distances[(start, goal)]}")
 
