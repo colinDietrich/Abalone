@@ -28,9 +28,6 @@ class MyPlayer(PlayerAbalone):
         """
         super().__init__(piece_type, name, time_limit, *args)
         self.max_time = time_limit
-        self.start_time = time.time()
-        self.time_passed = 0
-        self.time_left = 0
         self.turn = 0
         # Chargement du dictionnaire s'il n'a pas encore été chargé.
         if MyPlayer.all_distances is None:
@@ -49,24 +46,15 @@ class MyPlayer(PlayerAbalone):
             Action: Action sélectionnée par le joueur.
         """
         # measure time of the action
-        start_time_action = time.time()
         possible_actions = list(current_state.get_possible_actions())
         self.other_id = possible_actions[0].get_next_game_state().next_player.get_id()
-        depth = self.adjust_depth(current_state)  # Ajustement dynamique de la profondeur de l'algorithme MiniMax.
-        start = time.time()
+        depth = self.adjust_depth()  # Ajustement dynamique de la profondeur de l'algorithme MiniMax.
         action, score = self.miniMax(current_state, depth, alpha=float('-inf'), beta=float('inf'), maximizing=True)
-        end = time.time()
-        print(f"Time taken: {end - start:.2f}s")
         # measure time and nbr of turns played
         self.turn += 1
-        stop_time_action = time.time()
-        self.time_passed += stop_time_action - start_time_action
-        self.time_left = self.max_time - self.time_passed
-        print("Tour n° : "+ str(self.turn) +" , temps écoule : "+str(self.time_passed)+" Il reste "+str(self.time_left))
-        
         return action
 
-    def adjust_depth(self, current_state: GameStateAbalone):
+    def adjust_depth(self):
         """
         Ajuste la profondeur de l'algorithme MiniMax en fonction de l'état actuel du jeu.
 
@@ -76,20 +64,15 @@ class MyPlayer(PlayerAbalone):
         Returns:
             int: Profondeur ajustée pour l'algorithme MiniMax.
         """
-        pieces_count = len(self.get_pieces(current_state)[0])  # Obtient le nombre de pièces du joueur.
         turn_left = 25 - self.turn
-        print(self.time_left)
         # Début du jeu : Profondeur plus faible (Le jeu commence avec 14 pièces).
-        if pieces_count > 12:  
-            return 2
-
-        # Milieu de jeu : Profondeur adaptative.
-        elif 8 < pieces_count <= 12 :
-            return 3  
-
-        # Fin de jeu : Profondeur plus élevée.
+        if turn_left < 16:  
+            return 3
         else:
-            return 4  # Augmentation de la profondeur en fin de jeu pour une vision stratégique plus profonde.
+            if(self.get_remaining_time() - turn_left * 60 > 0):
+                return 4
+            else:
+                return 3
 
     def miniMax(self, state: GameStateAbalone, depth: int, alpha, beta, maximizing: bool):
         """
@@ -156,6 +139,7 @@ class MyPlayer(PlayerAbalone):
             print("Central Score:", central_score)
             print("Connectedness Score:", connectedness_score)
             print("Connectedness Score (Other Player):", connectedness_score_other_player)
+            print("remaining time:",self.get_remaining_time())
 
         # Détermination de la phase de jeu
         ejected_pieces = 14 - len(other_player_pieces) # Nombre de pièces éjectées de l'adversaire
@@ -219,30 +203,9 @@ class MyPlayer(PlayerAbalone):
             float: Distance normalisée par rapport au centre.
         """
         central_position = (8, 4)
-        length_to_center = sum(self.manhattanDist(coord, central_position) for coord in player_pieces)
+        length_to_center = sum(self.all_distances[(coord, central_position)] if coord != central_position else 0 for coord in player_pieces)
         max_distance = 4 * len(player_pieces)
         return length_to_center / max_distance
-
-    def manhattanDist(self, A, B):
-        """
-        Calcule la distance de Manhattan entre deux points, en tenant compte des particularités du plateau.
-
-        Args:
-            A (tuple): Coordonnées du premier point.
-            B (tuple): Coordonnées du second point, typiquement le centre (8, 4).
-
-        Returns:
-            float: Distance de Manhattan ajustée.
-        """
-        mask1 = [(0,2),(1,3),(2,4)]
-        mask2 = [(0,4)]
-        diff = (abs(B[0] - A[0]), abs(B[1] - A[1]))
-        dist = (abs(B[0] - A[0]) + abs(B[1] - A[1])) / 2
-        if diff in mask1:
-            dist += 1
-        if diff in mask2:
-            dist += 2
-        return dist
 
     def degree_of_connectedness(self, piece_coordinates):
         """
