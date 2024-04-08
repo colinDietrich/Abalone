@@ -29,7 +29,7 @@ class MyPlayer(PlayerAbalone):
         super().__init__(piece_type, name, time_limit, *args)
         # Chargement du dictionnaire s'il n'a pas encore été chargé.
         if MyPlayer.all_distances is None:
-            with open('abalone_distances.pkl', 'rb') as f:
+            with open('src/abalone_distances.pkl', 'rb') as f:
                 MyPlayer.all_distances = pickle.load(f)
 
     def compute_action(self, current_state: GameStateAbalone, **kwargs) -> Action:
