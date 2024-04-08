@@ -46,7 +46,10 @@ class MyPlayer(PlayerAbalone):
         possible_actions = list(current_state.get_possible_actions())
         self.other_id = possible_actions[0].get_next_game_state().next_player.get_id()
         depth = self.adjust_depth(current_state)  # Ajustement dynamique de la profondeur de l'algorithme MiniMax.
+        start = time.time()
         action, score = self.miniMax(current_state, depth, alpha=float('-inf'), beta=float('inf'), maximizing=True)
+        end = time.time()
+        print(f"Time taken: {end - start:.2f}s")
         return action
 
     def adjust_depth(self, current_state: GameStateAbalone):
@@ -112,7 +115,7 @@ class MyPlayer(PlayerAbalone):
                     break
             return best_action, min_score
 
-    def evaluate_state(self, state:GameStateAbalone, debug=True):
+    def evaluate_state(self, state:GameStateAbalone, debug=False):
         """
         Évalue l'état actuel du jeu pour déterminer son avantage pour le joueur.
 
