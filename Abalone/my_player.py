@@ -66,7 +66,7 @@ class MyPlayer(PlayerAbalone):
         """
         turn_left = 25 - self.turn
         # Début du jeu : Profondeur plus faible (Le jeu commence avec 14 pièces).
-        if turn_left < 16:  
+        if turn_left > 10:  
             return 3
         else:
             if(self.get_remaining_time() - turn_left * 60 > 0):
