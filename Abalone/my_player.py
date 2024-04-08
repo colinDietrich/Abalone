@@ -151,13 +151,13 @@ class MyPlayer(PlayerAbalone):
         elif connectedness_score < 0.5:
             if debug:
                 print("Phase 2 : Groupe Compact + Dominance Centrale")
-            a, b, c, d = 1, 0.5, 2, 0.01  # Poids ajustés pour la compacité et le contrôle central
+            a, b, c, d = 1, 1, 2, 0.01  # Poids ajustés pour la compacité et le contrôle central
             
         # Phase 3 : Jeu Agressif
         else:
             if debug:
                 print("Phase 3 : Jeu Agressif")
-            a, b, c, d = 3, 0.1, 0.1, 0.5  # Changement de focus vers un jeu plus agressif
+            a, b, c, d = 3, 1, 0.1, 0.5  # Changement de focus vers un jeu plus agressif
             if ejected_pieces >= 3:  # Aggression accrue après l'éjection de 5 pièces
                 a, c = 3, 1  # Augmentation des poids pour l'agression
 
