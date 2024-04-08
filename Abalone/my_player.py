@@ -30,7 +30,7 @@ class MyPlayer(PlayerAbalone):
         self.turn = 0
         # Chargement du dictionnaire s'il n'a pas encore été chargé.
         if MyPlayer.all_distances is None:
-            with open('src/abalone_distances.pkl', 'rb') as f:
+            with open('src_2226611_2225992/abalone_distances.pkl', 'rb') as f:
                 MyPlayer.all_distances = pickle.load(f)
 
     def compute_action(self, current_state: GameStateAbalone, **kwargs) -> Action:
