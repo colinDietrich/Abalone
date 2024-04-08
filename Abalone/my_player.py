@@ -3,7 +3,6 @@ from game_state_abalone import GameStateAbalone
 from seahorse.game.action import Action
 from seahorse.game.game_state import GameState
 from seahorse.utils.custom_exceptions import MethodNotImplementedError
-import time
 import pickle
 
 class MyPlayer(PlayerAbalone):
@@ -67,12 +66,12 @@ class MyPlayer(PlayerAbalone):
         turn_left = 25 - self.turn
         # Début du jeu : Profondeur plus faible (Le jeu commence avec 14 pièces).
         if turn_left > 10:  
-            return 3
+            return 2
         else:
             if(self.get_remaining_time() - turn_left * 60 > 0):
-                return 4
-            else:
                 return 3
+            else:
+                return 2
 
     def miniMax(self, state: GameStateAbalone, depth: int, alpha, beta, maximizing: bool):
         """
