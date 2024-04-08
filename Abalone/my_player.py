@@ -14,7 +14,7 @@ class MyPlayer(PlayerAbalone):
         piece_type (str): Type de pièce du joueur.
     """
 
-    # Variable de classe pour stocker le dictionnaire chargé.
+    # Variable de classe pour stocker le dictionnaire qui contient toutes les distances entre 2 cases.
     all_distances = None
 
     def __init__(self, piece_type: str, name: str = "bob", time_limit: float = 60*15, *args) -> None:
@@ -27,6 +27,11 @@ class MyPlayer(PlayerAbalone):
             time_limit (float, optionnel): Limite de temps en secondes.
         """
         super().__init__(piece_type, name, time_limit, *args)
+        self.max_time = time_limit
+        self.start_time = time.time()
+        self.time_passed = 0
+        self.time_left = 0
+        self.turn = 0
         # Chargement du dictionnaire s'il n'a pas encore été chargé.
         if MyPlayer.all_distances is None:
             with open('src/abalone_distances.pkl', 'rb') as f:
@@ -43,6 +48,8 @@ class MyPlayer(PlayerAbalone):
         Returns:
             Action: Action sélectionnée par le joueur.
         """
+        # measure time of the action
+        start_time_action = time.time()
         possible_actions = list(current_state.get_possible_actions())
         self.other_id = possible_actions[0].get_next_game_state().next_player.get_id()
         depth = self.adjust_depth(current_state)  # Ajustement dynamique de la profondeur de l'algorithme MiniMax.
@@ -50,6 +57,13 @@ class MyPlayer(PlayerAbalone):
         action, score = self.miniMax(current_state, depth, alpha=float('-inf'), beta=float('inf'), maximizing=True)
         end = time.time()
         print(f"Time taken: {end - start:.2f}s")
+        # measure time and nbr of turns played
+        self.turn += 1
+        stop_time_action = time.time()
+        self.time_passed += stop_time_action - start_time_action
+        self.time_left = self.max_time - self.time_passed
+        print("Tour n° : "+ str(self.turn) +" , temps écoule : "+str(self.time_passed)+" Il reste "+str(self.time_left))
+        
         return action
 
     def adjust_depth(self, current_state: GameStateAbalone):
@@ -63,12 +77,14 @@ class MyPlayer(PlayerAbalone):
             int: Profondeur ajustée pour l'algorithme MiniMax.
         """
         pieces_count = len(self.get_pieces(current_state)[0])  # Obtient le nombre de pièces du joueur.
+        turn_left = 25 - self.turn
+        print(self.time_left)
         # Début du jeu : Profondeur plus faible (Le jeu commence avec 14 pièces).
         if pieces_count > 12:  
             return 2
 
         # Milieu de jeu : Profondeur adaptative.
-        elif 8 < pieces_count <= 12:
+        elif 8 < pieces_count <= 12 :
             return 3  
 
         # Fin de jeu : Profondeur plus élevée.
@@ -91,7 +107,8 @@ class MyPlayer(PlayerAbalone):
         """
         if depth == 0 or state.is_done():
             return None, self.evaluate_state(state)
-
+        
+        # joueur maximisant
         if maximizing:
             max_score = float('-inf')
             best_action = None
@@ -103,6 +120,8 @@ class MyPlayer(PlayerAbalone):
                 if beta <= alpha:
                     break
             return best_action, max_score
+        
+        # joueur minimisant
         else:
             min_score = float('inf')
             best_action = None
