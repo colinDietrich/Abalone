@@ -63,8 +63,8 @@ def get_players_pieces(last_turn):
 
 
 # play with this
-nbr_of_games = 25
-command = "python main_abalone.py -t local random_player_abalone.py my_player.py -c alien -r -g"
+nbr_of_games = 5
+command = "python main_abalone.py -t local minimax_score_player.py my_player.py -r -g"
 turn = 1 # 0 if first (player1), 1 if second (player 2)
 
 # simulate n games with command line
@@ -80,34 +80,39 @@ won = 0
 lost = 0
 score_equal = 0
 closer = 0
+my_scores = 0
+other_scores = 0
 for game in games:
     last_turn = game[-1]
     #get player id
     player_1_id = last_turn["players"][0]["id"]
     player_2_id = last_turn["players"][1]["id"]
+    # determine my player
+    if turn == 0:
+        my_id = player_1_id
+        other_id = player_2_id
+    elif turn == 1:
+        my_id = player_2_id
+        other_id = player_1_id
     #get scores with id
-    score_1 = last_turn["scores"][str(player_1_id)]
-    score_2 = last_turn["scores"][str(player_2_id)]
-    if score_1>score_2:
-        if turn==0:
-            won +=1
-        elif turn==1:
-            lost +=1
-    elif score_1<score_2:
-        if turn==0:
-            lost +=1
-        elif turn==1:
-            won +=1
+    my_score = last_turn["scores"][str(my_id)]
+    other_score = last_turn["scores"][str(other_id)]
+    my_scores += my_score
+    other_scores += other_score
+    #Determine winner
+    if my_score>other_score:
+        won +=1
+    elif my_score<other_score:
+        lost +=1
     else:
         score_equal +=1
-        pieces1, pieces2 = get_players_pieces(last_turn)
-        if distance_to_center(pieces1)<distance_to_center(pieces2):
-            if turn==0:
-                closer +=1 
-        else:
-            if turn==1:
-                closer +=1
-        
+        if turn == 0:
+            my_pieces, other_pieces = get_players_pieces(last_turn)
+        elif turn == 1:
+            other_pieces, my_pieces = get_players_pieces(last_turn)
+        if distance_to_center(my_pieces)<distance_to_center(other_pieces):
+            closer +=1 
+                
 #print stats
 pure_win_per = won/len(games)
 win_per = (won+closer)/len(games)
@@ -115,12 +120,14 @@ pure_loss_per = lost/len(games)
 loss_per = (lost+(score_equal-closer))
 if score_equal != 0:
     closer_perc = closer/score_equal
-
+my_mean = my_scores/len(games)
+other_mean = other_scores/len(games)
 
 print("STATS :")
 print("Pure win percerntage : "+ str(pure_win_per), " Games won : " + str(won)+"/"+str(len(games)))
 print("Pure loss percerntage : "+ str(pure_loss_per), " Games lost : " + str(lost)+"/"+str(len(games)))
 print("Equalities: "+ str(score_equal) + ", " + str(closer)+"/" +str(score_equal)+ " won by being closer")
+print("Score moyen (my_player vs other) : " + str(my_mean) + " vs " + str(other_mean))
 
 
 
